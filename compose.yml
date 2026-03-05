@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  zentry-db:
+    image: postgres:16
+    container_name: zentry_postgres
+    environment:
+      - POSTGRES_DB=zentry_iam
+      - POSTGRES_USER=ranxom
+      - POSTGRES_PASSWORD=super_secure_password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ranxom_admin -d zentry_iam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

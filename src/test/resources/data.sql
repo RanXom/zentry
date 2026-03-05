@@ -1,0 +1,2 @@
+INSERT INTO users (username, password, active) VALUES ('ranxom_test', 'bcrypted_password_here', true);
+INSERT INTO users (username, password, active) VALUES ('ghost_user', 'bcrypted_password_here', false);
