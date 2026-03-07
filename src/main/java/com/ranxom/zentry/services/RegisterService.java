@@ -48,7 +48,7 @@ public class RegisterService {
 
         var userDetails = new ZentryUserDetails(user);
         var jwtToken = jwtService.generateToken(userDetails);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return AuthenticationResponse.builder().accessToken(jwtToken).build();
     }
 
 }
