@@ -1,5 +1,6 @@
 package com.ranxom.zentry.services;
 
+import com.ranxom.zentry.dto.AuthenticationResponse;
 import com.ranxom.zentry.model.RefreshToken;
 import com.ranxom.zentry.model.User;
 import com.ranxom.zentry.repository.RefreshTokenRepository;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,22 +27,41 @@ class RefreshServiceTest {
     @InjectMocks private RefreshService refreshService;
 
     @Test
-    void shouldRefreshAccessToken() {
+    void shouldRefreshSuccessfully() {
         // Arrange
-        String tokenStr = "valid-uuid";
+        String rawToken = "valid-uuid-string";
         User user = User.builder().username("shizain").build();
-        RefreshToken refreshToken = RefreshToken.builder().token(tokenStr).user(user).build();
+        RefreshToken refreshToken = RefreshToken.builder()
+                .token(rawToken)
+                .user(user)
+                .expiryDate(Instant.now().plusSeconds(60))
+                .build();
 
-        when(refreshTokenRepository.findByToken(tokenStr)).thenReturn(Optional.of(refreshToken));
+        when(refreshTokenRepository.findByToken(rawToken)).thenReturn(Optional.of(refreshToken));
         when(refreshTokenService.verifyExpiration(refreshToken)).thenReturn(refreshToken);
         when(jwtService.generateToken(any())).thenReturn("new-access-token");
 
         // Act
-        var response = refreshService.execute(tokenStr);
+        AuthenticationResponse response = refreshService.execute(rawToken);
 
         // Assert
         assertEquals("new-access-token", response.getAccessToken());
-        assertEquals(tokenStr, response.getRefreshToken());
+        assertEquals(rawToken, response.getRefreshToken());
+        verify(jwtService, times(1)).generateToken(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTokenNotFound() {
+        // Arrange
+        String invalidToken = "fake-token";
+        when(refreshTokenRepository.findByToken(invalidToken)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> refreshService.execute(invalidToken));
+
+        assertTrue(exception.getMessage().contains("not recognized"));
+        verify(jwtService, never()).generateToken(any());
     }
 
 }
