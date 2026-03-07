@@ -6,6 +6,7 @@ import com.ranxom.zentry.dto.AuthenticationResponse;
 import com.ranxom.zentry.repository.UserRepository;
 import com.ranxom.zentry.security.JwtService;
 import com.ranxom.zentry.security.ZentryUserDetails;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class AuthenticateService {
         this.refreshTokenService = refreshTokenService;
     }
 
+    @Transactional
     @Auditable(action = "IDENTITY_AUTHENTICATED")
     public AuthenticationResponse execute(AuthenticationRequest request) {
 

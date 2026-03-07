@@ -29,7 +29,7 @@ public class RefreshService {
                             .refreshToken(requestToken)
                             .build();
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh token is not in the vault!"));
+                .orElseThrow(() -> new RuntimeException("Refresh token is not recognized in the vault!"));
     }
 
 }

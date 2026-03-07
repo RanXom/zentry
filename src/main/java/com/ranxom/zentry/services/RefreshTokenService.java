@@ -3,6 +3,7 @@ package com.ranxom.zentry.services;
 import com.ranxom.zentry.model.RefreshToken;
 import com.ranxom.zentry.repository.RefreshTokenRepository;
 import com.ranxom.zentry.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public RefreshToken createRefreshToken(String username) {
         var user = userRepository.findByUsername(username).orElseThrow();
 
