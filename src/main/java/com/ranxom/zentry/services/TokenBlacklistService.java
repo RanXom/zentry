@@ -12,13 +12,14 @@ public class TokenBlacklistService {
 
     private final StringRedisTemplate redisTemplate;
 
-    public void blacklistToken(String jti, long expirationMillis) {
-        redisTemplate.opsForValue().set(jti, "blacklisted",
-                Duration.ofMillis(expirationMillis));
+    public void blacklistToken(String jti, long ttl) {
+        // Use a consistent prefix so the Filter can find it
+        redisTemplate.opsForValue().set("BLACKLIST_" + jti, "true", Duration.ofMillis(ttl));
     }
 
     public boolean isBlacklisted(String jti) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(jti));
+        if (jti == null) return false;
+        return Boolean.TRUE.equals(redisTemplate.hasKey("BLACKLIST_" + jti));
     }
 
 }

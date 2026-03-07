@@ -20,17 +20,20 @@ public class AuthenticateService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
+    private final TokenBlacklistService blacklistService;
 
     public AuthenticateService(
             UserRepository repository,
             JwtService jwtService,
             AuthenticationManager authenticationManager,
-            RefreshTokenService refreshTokenService
+            RefreshTokenService refreshTokenService,
+            TokenBlacklistService blacklistService
     ) {
         this.jwtService = jwtService;
         this.repository = repository;
         this.authenticationManager = authenticationManager;
         this.refreshTokenService = refreshTokenService;
+        this.blacklistService = blacklistService;
     }
 
     @Transactional
@@ -61,15 +64,14 @@ public class AuthenticateService {
     public void logout(String token) {
         String jti = jwtService.extractJti(token);
         Date expiration = jwtService.extractExpiration(token);
-
         long ttl = expiration.getTime() - System.currentTimeMillis();
 
         if (ttl > 0) {
-            refreshTokenService.blacklistToken(jti, ttl);
+            blacklistService.blacklistToken(jti, ttl);
         }
 
-        // Nuke the Refresh Token from Postgres for complete Zero-Trust
-        var username = jwtService.extractUsername(token);
+        // Nuke the Refresh Token from Postgres to kill the whole session
+        String username = jwtService.extractUsername(token);
         var user = repository.findByUsername(username).orElseThrow();
         refreshTokenService.revokeRefreshToken(user);
     }

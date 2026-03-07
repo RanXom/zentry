@@ -46,7 +46,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jti = jwtService.extractJti(jwt);
         if (jti != null && blacklistService.isBlacklisted(jti)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("This token has been revoked.");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Sentinel Alert: Token has been revoked.\"}");
             return;
         }
 
