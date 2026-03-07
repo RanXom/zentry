@@ -39,6 +39,10 @@ public class AuthenticateService {
 
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow();
+
+        user.setLastLogin(java.time.LocalDateTime.now()); // Update the last login whenever a login happens
+        repository.save(user);
+
         var userDetails = new ZentryUserDetails(user);
         var jwtToken = jwtService.generateToken(userDetails);
         return AuthenticationResponse.builder().token(jwtToken).build();
