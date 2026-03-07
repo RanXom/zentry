@@ -38,6 +38,7 @@ public class AuthenticateService {
         );
 
         var user = repository.findByUsername(request.getUsername()).orElseThrow();
+
         user.setLastLogin(java.time.LocalDateTime.now());
         repository.save(user);
 

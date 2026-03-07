@@ -3,7 +3,14 @@ package com.ranxom.zentry.controller;
 import com.ranxom.zentry.dto.AuthenticationRequest;
 import com.ranxom.zentry.dto.AuthenticationResponse;
 import com.ranxom.zentry.dto.RegisterRequest;
+import com.ranxom.zentry.dto.TokenRefreshRequest;
+import com.ranxom.zentry.model.RefreshToken;
+import com.ranxom.zentry.repository.RefreshTokenRepository;
+import com.ranxom.zentry.security.JwtService;
+import com.ranxom.zentry.security.ZentryUserDetails;
 import com.ranxom.zentry.services.AuthenticateService;
+import com.ranxom.zentry.services.RefreshService;
+import com.ranxom.zentry.services.RefreshTokenService;
 import com.ranxom.zentry.services.RegisterService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +23,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final RefreshTokenRepository refreshTokenRepository;
+
     private final AuthenticateService authenticateService;
     private final RegisterService registerService;
+    private final RefreshService refreshService;
 
     public AuthController(
+            RefreshTokenRepository refreshTokenRepository,
             AuthenticateService authenticateService,
-            RegisterService registerService
+            RegisterService registerService,
+            RefreshService refreshService
     ) {
+        this.refreshTokenRepository = refreshTokenRepository;
+
         this.authenticateService = authenticateService;
         this.registerService = registerService;
+        this.refreshService = refreshService;
     }
 
     @PostMapping("/register")
@@ -35,6 +50,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authenticationRequest) {
         return ResponseEntity.ok(authenticateService.execute(authenticationRequest));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody TokenRefreshRequest request) {
+        return ResponseEntity.ok(refreshService.execute(request.getRefreshToken()));
     }
 
 }
