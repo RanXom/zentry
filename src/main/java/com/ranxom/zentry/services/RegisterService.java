@@ -16,15 +16,18 @@ public class RegisterService {
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public RegisterService(
             UserRepository repository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            RefreshTokenService refreshTokenService
     ) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Auditable(action = "IDENTITY_REGISTERED")
@@ -48,7 +51,14 @@ public class RegisterService {
 
         var userDetails = new ZentryUserDetails(user);
         var jwtToken = jwtService.generateToken(userDetails);
-        return AuthenticationResponse.builder().accessToken(jwtToken).build();
+
+        var refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken.getToken())
+                .build();
+
     }
 
 }
