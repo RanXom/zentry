@@ -21,4 +21,5 @@ public class Permission {
     private String key;
 
     private String description;
+
 }
