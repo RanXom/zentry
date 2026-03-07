@@ -1,5 +1,6 @@
 package com.ranxom.zentry.services;
 
+import com.ranxom.zentry.aop.Auditable;
 import com.ranxom.zentry.dto.AuthenticationRequest;
 import com.ranxom.zentry.dto.AuthenticationResponse;
 import com.ranxom.zentry.repository.UserRepository;
@@ -26,6 +27,7 @@ public class AuthenticateService {
         this.authenticationManager = authenticationManager;
     }
 
+    @Auditable(action = "IDENTITY_AUTHENTICATED")
     public AuthenticationResponse execute(AuthenticationRequest request) {
         // This triggers the full Spring Security Auth Provider check
         authenticationManager.authenticate(

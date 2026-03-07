@@ -1,5 +1,6 @@
 package com.ranxom.zentry.services;
 
+import com.ranxom.zentry.aop.Auditable;
 import com.ranxom.zentry.dto.AuthenticationResponse;
 import com.ranxom.zentry.dto.RegisterRequest;
 import com.ranxom.zentry.model.User;
@@ -26,6 +27,7 @@ public class RegisterService {
         this.jwtService = jwtService;
     }
 
+    @Auditable(action = "IDENTITY_REGISTERED")
     public AuthenticationResponse execute(RegisterRequest request) {
 
         if (repository.existsByUsername(request.getUsername())) {
