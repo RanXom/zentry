@@ -1,5 +1,6 @@
 package com.ranxom.zentry.security;
 
+import com.ranxom.zentry.services.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenBlacklistService blacklistService; // Injected via constructor
 
     @Override
     protected void doFilterInternal(
@@ -40,6 +42,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract the token (everything after "Bearer ")
         jwt = authHeader.substring(7);
+
+        String jti = jwtService.extractJti(jwt);
+        if (blacklistService.isBlacklisted(jti)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token has been revoked by the Sentinel.");
+            return;
+        }
+
         username = jwtService.extractUsername(jwt);
 
         // If a username exists and the user isn't already authenticated in this context
@@ -63,4 +73,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Pass the request to the next filter in the chain
         filterChain.doFilter(request, response);
     }
+
 }

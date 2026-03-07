@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -36,15 +37,19 @@ public class JwtService {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    // MODERN SYNTAX: JJWT 0.12+
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
+                .id(UUID.randomUUID().toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSignInKey()) // Algorithm is inferred from key type
+                .signWith(getSignInKey())
                 .compact();
+    }
+
+    public String extractJti(String token) {
+        return extractClaim(token, Claims::getId);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
