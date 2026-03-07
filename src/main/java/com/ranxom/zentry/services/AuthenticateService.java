@@ -11,6 +11,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class AuthenticateService {
 
@@ -53,6 +55,23 @@ public class AuthenticateService {
                 .refreshToken(refreshToken.getToken())
                 .build();
 
+    }
+
+    @Auditable(action = "IDENTITY_EXILED")
+    public void logout(String token) {
+        String jti = jwtService.extractJti(token);
+        Date expiration = jwtService.extractExpiration(token);
+
+        long ttl = expiration.getTime() - System.currentTimeMillis();
+
+        if (ttl > 0) {
+            refreshTokenService.blacklistToken(jti, ttl);
+        }
+
+        // Nuke the Refresh Token from Postgres for complete Zero-Trust
+        var username = jwtService.extractUsername(token);
+        var user = repository.findByUsername(username).orElseThrow();
+        refreshTokenService.revokeRefreshToken(user);
     }
 
 }

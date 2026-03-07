@@ -12,6 +12,7 @@ import com.ranxom.zentry.services.AuthenticateService;
 import com.ranxom.zentry.services.RefreshService;
 import com.ranxom.zentry.services.RefreshTokenService;
 import com.ranxom.zentry.services.RegisterService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,16 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refresh(@RequestBody TokenRefreshRequest request) {
         return ResponseEntity.ok(refreshService.execute(request.getRefreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            authenticateService.logout(jwt);
+        }
+        return ResponseEntity.ok("Identity successfully exiled from the active session.");
     }
 
 }
