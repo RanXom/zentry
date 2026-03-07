@@ -27,6 +27,15 @@ public class RegisterService {
     }
 
     public AuthenticationResponse execute(RegisterRequest request) {
+
+        if (repository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username already claimed within Zentry.");
+        }
+
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already associated with an identity.");
+        }
+
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
