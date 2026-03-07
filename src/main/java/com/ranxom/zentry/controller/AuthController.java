@@ -5,6 +5,7 @@ import com.ranxom.zentry.dto.AuthenticationResponse;
 import com.ranxom.zentry.dto.RegisterRequest;
 import com.ranxom.zentry.services.AuthenticateService;
 import com.ranxom.zentry.services.RegisterService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.ok(registerService.execute(registerRequest));
     }
 
