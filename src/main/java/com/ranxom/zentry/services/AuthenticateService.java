@@ -16,36 +16,40 @@ public class AuthenticateService {
     private final UserRepository repository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthenticateService(
             UserRepository repository,
             JwtService jwtService,
-            AuthenticationManager authenticationManager
+            AuthenticationManager authenticationManager,
+            RefreshTokenService refreshTokenService
     ) {
         this.jwtService = jwtService;
         this.repository = repository;
         this.authenticationManager = authenticationManager;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Auditable(action = "IDENTITY_AUTHENTICATED")
     public AuthenticationResponse execute(AuthenticationRequest request) {
-        // This triggers the full Spring Security Auth Provider check
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        var user = repository.findByUsername(request.getUsername())
-                .orElseThrow();
-
-        user.setLastLogin(java.time.LocalDateTime.now()); // Update the last login whenever a login happens
+        var user = repository.findByUsername(request.getUsername()).orElseThrow();
+        user.setLastLogin(java.time.LocalDateTime.now());
         repository.save(user);
 
         var userDetails = new ZentryUserDetails(user);
-        var jwtToken = jwtService.generateToken(userDetails);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        var accessToken = jwtService.generateToken(userDetails);
+        var refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .build();
+
     }
 
 }
