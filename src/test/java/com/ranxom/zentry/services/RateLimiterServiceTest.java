@@ -44,4 +44,5 @@ class RateLimiterServiceTest {
         assertFalse(bucket1.tryConsume(1));
         assertTrue(bucket2.tryConsume(1), "IP 2 should not be affected by IP 1's spam");
     }
+
 }
