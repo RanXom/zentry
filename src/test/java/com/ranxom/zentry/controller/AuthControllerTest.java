@@ -84,5 +84,5 @@ class AuthControllerTest extends BaseControllerTest {
 
         verify(authenticateService).logout("mock-jwt");
     }
-}
 
+}

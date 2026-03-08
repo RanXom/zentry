@@ -70,4 +70,12 @@ class AdminControllerTest extends BaseControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @WithMockUser(authorities = "ROLE_ADMIN") // It checks for hasRole('ROLE_ADMIN')
+    void getSystemStatus_ShouldReturnOptimal() throws Exception {
+        mockMvc.perform(get("/api/admin/status"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Sentinel Status: Optimal. Redis and Postgres are in sync."));
+    }
+
 }
