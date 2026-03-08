@@ -2,7 +2,6 @@ package com.ranxom.zentry.config;
 
 import com.ranxom.zentry.security.JwtAuthenticationFilter;
 import com.ranxom.zentry.security.RateLimitFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;

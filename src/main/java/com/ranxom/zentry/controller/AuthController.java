@@ -1,46 +1,36 @@
 package com.ranxom.zentry.controller;
 
-import com.ranxom.zentry.dto.AuthenticationRequest;
-import com.ranxom.zentry.dto.AuthenticationResponse;
-import com.ranxom.zentry.dto.RegisterRequest;
-import com.ranxom.zentry.dto.TokenRefreshRequest;
+import com.ranxom.zentry.dto.*;
 import com.ranxom.zentry.model.RefreshToken;
 import com.ranxom.zentry.repository.RefreshTokenRepository;
 import com.ranxom.zentry.security.JwtService;
 import com.ranxom.zentry.security.ZentryUserDetails;
-import com.ranxom.zentry.services.AuthenticateService;
-import com.ranxom.zentry.services.RefreshService;
-import com.ranxom.zentry.services.RefreshTokenService;
-import com.ranxom.zentry.services.RegisterService;
+import com.ranxom.zentry.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@Slf4j
 public class AuthController {
-
-    private final RefreshTokenRepository refreshTokenRepository;
 
     private final AuthenticateService authenticateService;
     private final RegisterService registerService;
     private final RefreshService refreshService;
+    private final PasswordResetService resetService;
 
     public AuthController(
-            RefreshTokenRepository refreshTokenRepository,
             AuthenticateService authenticateService,
             RegisterService registerService,
-            RefreshService refreshService
-    ) {
-        this.refreshTokenRepository = refreshTokenRepository;
-
+            RefreshService refreshService,
+            PasswordResetService resetService) {
         this.authenticateService = authenticateService;
         this.registerService = registerService;
         this.refreshService = refreshService;
+        this.resetService = resetService;
     }
 
     @PostMapping("/register")
@@ -66,6 +56,22 @@ public class AuthController {
             authenticateService.logout(jwt);
         }
         return ResponseEntity.ok("Identity successfully exiled from the active session.");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String token = resetService.createResetToken(request.email());
+
+        log.info("SENTINEL_RESTORE_LINK: http://localhost:8080/api/auth/reset-password?token={}", token);
+        return ResponseEntity.ok("If an identity is linked to this email, a restoration link has been forged.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @RequestParam String token,
+            @Valid @RequestBody ResetPasswordRequest request) {
+        resetService.completeReset(token, request.newPassword());
+        return ResponseEntity.ok("Identity has been successfully reshaped with new credentials.");
     }
 
 }
