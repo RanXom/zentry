@@ -33,7 +33,7 @@ public class User {
 
     @Builder.Default
     @Column(name = "account_locked")
-    private boolean locked = false;
+    private boolean accountLocked = false;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -34,9 +34,7 @@ public record ZentryUserDetails(User user) implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return !user.isLocked(); // Zero-Trust: Locked accounts stay out
-    }
+    public boolean isAccountNonLocked() { return !user.isAccountLocked(); }
 
     @Override
     public boolean isCredentialsNonExpired() {
@@ -44,8 +42,6 @@ public record ZentryUserDetails(User user) implements UserDetails {
     }
 
     @Override
-    public boolean isEnabled() {
-        return user.isActive();
-    }
+    public boolean isEnabled() { return user.isActive(); }
 
 }
