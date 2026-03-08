@@ -13,6 +13,10 @@ WHERE NOT EXISTS (SELECT 1 FROM permissions WHERE permission_key = 'ROLE_ASSIGN'
 
 -- 2. Seed Roles
 INSERT INTO roles (role_name, description)
+SELECT 'ROLE_USER', 'Standard Identity'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE role_name = 'ROLE_USER');
+
+INSERT INTO roles (role_name, description)
 SELECT 'ROLE_ADMIN', 'System Administrator'
 WHERE NOT EXISTS (SELECT 1 FROM roles WHERE role_name = 'ROLE_ADMIN');
 
