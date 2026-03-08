@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Aspect
 @Component
@@ -28,12 +29,18 @@ public class AuditInterceptor {
         Long actorId = (auth != null && auth.getPrincipal() instanceof ZentryUserDetails details)
                 ? details.user().getId() : null;
 
-        // Build the Audit Record
+        Map<String, Object> detailsMap = new HashMap<>();
+        Object[] args = joinPoint.getArgs();
+
+        if (args.length > 0 && args[0] != null) {
+            detailsMap.put("input_summary", "Payload processed for action: " + auditable.action());
+        }
+
         AuditLog log = AuditLog.builder()
                 .actorId(actorId)
                 .actionType(auditable.action())
                 .ipAddress(request.getRemoteAddr())
-                .details(new HashMap<>())
+                .details(detailsMap)
                 .build();
 
         // Commit to the immutable ledger
