@@ -2,7 +2,9 @@ package com.ranxom.zentry.services;
 
 import com.ranxom.zentry.dto.RegisterRequest;
 import com.ranxom.zentry.model.RefreshToken;
+import com.ranxom.zentry.model.Role;
 import com.ranxom.zentry.model.User;
+import com.ranxom.zentry.repository.RoleRepository;
 import com.ranxom.zentry.repository.UserRepository;
 import com.ranxom.zentry.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,17 +14,19 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class RegisterServiceTest {
 
-    @Mock private UserRepository repository;
+    @Mock private UserRepository userRepository;
+    @Mock private RoleRepository roleRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtService jwtService;
 
-    // CHANGE THIS: Use @Mock, not @InjectMocks
     @Mock private RefreshTokenService refreshTokenService;
 
     @InjectMocks private RegisterService registerService;
@@ -37,9 +41,11 @@ class RegisterServiceTest {
         // Arrange
         String username = "shizain";
         RegisterRequest request = new RegisterRequest(username, "shizain@zentry.io", "password123");
+        Role dummyRole = Role.builder().name("ROLE_USER").build();
 
-        when(repository.existsByUsername(username)).thenReturn(false);
-        when(repository.existsByEmail(anyString())).thenReturn(false);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(dummyRole));
+        when(userRepository.existsByUsername(username)).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("hashed_pass");
         when(jwtService.generateToken(any())).thenReturn("mocked_jwt");
 
@@ -56,19 +62,19 @@ class RegisterServiceTest {
         assertNotNull(response.getRefreshToken());
         assertEquals("mocked_jwt", response.getAccessToken());
         assertEquals("mock-uuid", response.getRefreshToken());
-        verify(repository, times(1)).save(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void shouldThrowExceptionWhenUsernameExists() {
         // Arrange
         RegisterRequest request = new RegisterRequest("ranxom", "admin@zentry.io", "pass");
-        when(repository.existsByUsername("ranxom")).thenReturn(true);
+        when(userRepository.existsByUsername("ranxom")).thenReturn(true);
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> registerService.execute(request));
         assertEquals("Username already claimed within Zentry.", exception.getMessage());
-        verify(repository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
 }
