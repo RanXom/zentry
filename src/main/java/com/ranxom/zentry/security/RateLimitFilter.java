@@ -1,11 +1,13 @@
 package com.ranxom.zentry.security;
 
 import com.ranxom.zentry.services.RateLimiterService;
+import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,29 +15,45 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final RateLimiterService rateLimiterService;
 
+    public RateLimitFilter(RateLimiterService rateLimiterService) {
+        this.rateLimiterService = rateLimiterService;
+    }
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        // Only care about rate limiting sensitive endpoints like Login and Register
-        String path = request.getRequestURI();
-        if (path.contains("/api/auth/")) {
-            String clientIp = request.getRemoteAddr();
-            var bucket = rateLimiterService.resolveBucket(clientIp);
+        String clientIp = request.getRemoteAddr();
 
-            if (!bucket.tryConsume(1)) {
-                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Sentinel Alert: Too many requests. Try again in a minute.\"}");
+        try {
+            Bucket bucket = rateLimiterService.resolveBucket(clientIp);
+
+            if (bucket == null) {
+                log.error("SENTINEL_ALERT: RateLimiterService returned null for IP: {}. Bypassing check.", clientIp);
+                filterChain.doFilter(request, response);
                 return;
             }
+
+            if (bucket.tryConsume(1)) {
+                filterChain.doFilter(request, response);
+            } else {
+                log.warn("RATE_LIMIT_EXCEEDED: IP {} has hit the threshold.", clientIp);
+                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                response.getWriter().write("Too many requests. Slow your pace, seeker.");
+            }
+        } catch (Exception e) {
+            log.error("SENTINEL_ERROR: Rate limiting failed unexpectedly: {}. Bypassing check.", e.getMessage());
+            filterChain.doFilter(request, response);
         }
 
-        filterChain.doFilter(request, response);
     }
+
 }
