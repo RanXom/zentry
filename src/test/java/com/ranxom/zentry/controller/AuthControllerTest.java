@@ -24,6 +24,7 @@ class AuthControllerTest extends BaseControllerTest {
     @MockitoBean private AuthenticateService authenticateService;
     @MockitoBean private RefreshService refreshService;
     @MockitoBean private RefreshTokenRepository refreshTokenRepository;
+    @MockitoBean private PasswordResetService passwordResetService;
 
     @Test
     void register_ShouldForgeNewIdentity() throws Exception {
@@ -83,6 +84,35 @@ class AuthControllerTest extends BaseControllerTest {
                 .andExpect(content().string("Identity successfully exiled from the active session."));
 
         verify(authenticateService).logout("mock-jwt");
+    }
+
+    @Test
+    void forgotPassword_ShouldForgueToken() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest("shizain@zentry.io");
+
+        when(passwordResetService.createResetToken("shizain@zentry.io")).thenReturn("mock-uuid");
+
+        mockMvc.perform(post("/api/auth/forgot-password").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("If an identity is linked to this email, a restoration link has been forged."));
+    }
+
+    @Test
+    void resetPassword_ShouldReshapeIdentity() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("NewNoblePass123!");
+        String token = "valid-token";
+
+        // No need to 'when' for a void method unless you want to throw an exception
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .param("token", token) // @RequestParam
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Identity has been successfully reshaped with new credentials."));
     }
 
 }
