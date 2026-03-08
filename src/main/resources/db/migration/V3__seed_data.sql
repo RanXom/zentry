@@ -33,7 +33,7 @@ WHERE r.role_name = 'ROLE_ADMIN'
 
 -- 4. Seed Initial User (Corrected Hash for 'noble_oath_2026')
 INSERT INTO users (username, email, password_hash, is_active)
-SELECT 'ranxom', 'admin@zentry.io', '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgqCZ.67389.tE408Cj4xXbXG0S2', true
+SELECT 'ranxom', 'admin@zentry.io', '$2a$12$GSRMy4nAYXqkhJcFSYFSzucFkxiJGcoHnRsNAKsuAwgJJD43DiCSG', true
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'ranxom');
 
 -- 5. Map User to Role
