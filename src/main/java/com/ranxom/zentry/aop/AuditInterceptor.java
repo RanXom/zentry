@@ -4,6 +4,7 @@ import com.ranxom.zentry.dto.RegisterRequest;
 import com.ranxom.zentry.model.AuditLog;
 import com.ranxom.zentry.repository.AuditLogRepository;
 import com.ranxom.zentry.security.ZentryUserDetails;
+import com.ranxom.zentry.utils.DataMasker;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,7 @@ public class AuditInterceptor {
                     .actionType(auditable.action())
                     .targetEntityId(targetEntityId)
                     .ipAddress(request.getRemoteAddr())
-                    .details(detailsMap)
+                    .details(DataMasker.mask(detailsMap))
                     .build();
 
             auditLogRepository.save(auditEntry);
