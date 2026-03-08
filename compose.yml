@@ -13,6 +13,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - zentry-net
 
   zentry-redis:
     image: redis:7-alpine
@@ -24,9 +26,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - zentry-net
 
   zentry-app:
-    image: zentry:latest
+    image: ranxom/zentry:latest
     container_name: zentry_sentinel
     ports:
       - "8080:8080"
@@ -36,10 +40,15 @@ services:
       - SPRING_DATASOURCE_PASSWORD=super_secure_password
       - SPRING_DATA_REDIS_HOST=zentry-redis
       - SPRING_DATA_REDIS_PORT=6379
-      # Replace with actual generated secret
       - ZENTRY_SECURITY_JWT_SECRET=VfeLjnKDK8d77nM35aHtlgV3G8XVg3fcps0PgR9pnzA
     depends_on:
       zentry-db:
         condition: service_healthy
       zentry-redis:
         condition: service_healthy
+    networks:
+      - zentry-net
+
+networks:
+  zentry-net:
+    driver: bridge
