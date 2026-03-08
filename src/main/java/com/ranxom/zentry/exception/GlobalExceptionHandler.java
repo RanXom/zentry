@@ -3,6 +3,7 @@ package com.ranxom.zentry.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException; // IMPORT THIS
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +13,12 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // Handle Access Denied (The 403 Guardian)
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<String> handleAccessDenied(AuthorizationDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: You lack the required authority.");
+    }
 
     // Handle Validation Failures (400 Bad Request)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -40,5 +47,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("An internal sentinel error occurred. Please try again.");
     }
-
 }
