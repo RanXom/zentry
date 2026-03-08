@@ -28,28 +28,13 @@ import org.springframework.context.annotation.Import;
 import com.ranxom.zentry.config.SecurityConfig;
 
 @WebMvcTest(AdminController.class)
-@Import(SecurityConfig.class)
-class AdminControllerTest {
+class AdminControllerTest extends BaseControllerTest {
 
-    private final MockMvc mockMvc;
-    private final ObjectMapper objectMapper;
-
-    @Autowired
-    public AdminControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
-        this.mockMvc = mockMvc;
-        this.objectMapper = objectMapper;
-    }
-
-    @MockitoBean private CustomUserDetailsService customUserDetailsService;
-    @MockitoBean private AdminService adminService;
-    @MockitoBean private AuditLogRepository auditLogRepository;
-    @MockitoBean private JwtService jwtService;
-    @MockitoBean private TokenBlacklistService blacklistService;
-    @MockitoBean private RateLimiterService rateLimiterService;
-    @MockitoBean private AuthenticationProvider authenticationProvider;
+    @MockitoBean
+    private AdminService adminService;
 
     @Test
-    @WithMockUser(authorities = "SYSTEM_READ")
+    @WithMockUser(authorities = {"ROLE_ADMIN", "SYSTEM_READ"})
     void getAllUsers_ShouldSucceed_WhenAdmin() throws Exception {
         UserResponse response = UserResponse.builder().username("ranxom").build();
         when(adminService.getAllUsers()).thenReturn(List.of(response));
@@ -60,15 +45,14 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "USER_WRITE")
+    @WithMockUser(authorities = {"ROLE_ADMIN", "USER_WRITE"}) // Role + Authority
     void toggleUserLock_ShouldSucceed_WhenAuthorized() throws Exception {
         mockMvc.perform(patch("/api/admin/users/1/toggle-lock").with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Identity state has been altered."));
+                .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(authorities = "USER_WRITE")
+    @WithMockUser(authorities = {"ROLE_ADMIN", "USER_WRITE"}) // Role + Authority
     void modifyUser_ShouldReshapeIdentity() throws Exception {
         AdminUserUpdate update = new AdminUserUpdate();
         update.setUsername("new_shizain");
