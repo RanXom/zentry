@@ -24,7 +24,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         // Only care about rate limiting sensitive endpoints like Login and Register
         String path = request.getRequestURI();
-        if (path.startsWith("/api/auth/")) {
+        if (path.contains("/api/auth/")) {
             String clientIp = request.getRemoteAddr();
             var bucket = rateLimiterService.resolveBucket(clientIp);
 
