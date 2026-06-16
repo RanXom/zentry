@@ -6,20 +6,24 @@ Zentry is a high-performance backend infrastructure designed for secure identity
 
 To run this project, the following components must be installed on the host system:
 
-* **Java Development Kit (JDK) 25** (OpenJDK recommended)
-* **Apache Maven 3.9+**
-* **Docker and Docker Compose** (for PostgreSQL and Redis orchestration)
+- **Java Development Kit (JDK) 25** (OpenJDK recommended)
+- **Apache Maven 3.9+**
+- **Docker and Docker Compose** (for PostgreSQL and Redis orchestration)
 
 ## Tech Stack
 
-* **Framework:** Spring Boot 4.0.3
-* **Security:** Spring Security 7.0
-* **Language:** Java 25
-* **Persistence:** Spring Data JPA (Hibernate 7.x)
-* **Database:** PostgreSQL 16
-* **Caching/State Management:** Redis 7 (Alpine)
-* **Serialization:** Jackson 3.0 (utilizing the `tools.jackson` namespace)
-* **AOP:** AspectJ for automated audit interceptors
+- **Framework:** Spring Boot 4.0.3
+- **Security:** Spring Security 7.0
+- **Language:** Java 25
+- **Persistence:** Spring Data JPA (Hibernate 7.x)
+- **Database:** PostgreSQL 16
+- **Caching/State Management:** Redis 7 (Alpine)
+- **Serialization:** Jackson 3.0 (utilizing the `tools.jackson` namespace)
+- **AOP:** AspectJ for automated audit interceptors
+
+## System Architecture
+
+![System Architecture](./assets/Architecture.svg)
 
 ## Getting Started
 
@@ -35,8 +39,8 @@ docker-compose up -d
 
 **Services Overview:**
 
-* **PostgreSQL:** Handles persistent storage for users, roles, permissions, and audit logs.
-* **Redis:** Manages short-lived data including JWT blacklists, API rate-limit buckets, and 15-minute password reset tokens.
+- **PostgreSQL:** Handles persistent storage for users, roles, permissions, and audit logs.
+- **Redis:** Manages short-lived data including JWT blacklists, API rate-limit buckets, and 15-minute password reset tokens.
 
 ---
 
@@ -87,31 +91,31 @@ The server will initialize on `http://localhost:8080`.
 
 ### Authentication Gateways (`/api/auth`)
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| `POST` | `/api/auth/register` | Creates a new user identity. |
-| `POST` | `/api/auth/login` | Exchanges credentials for Access (JWT) and Refresh tokens. |
-| `POST` | `/api/auth/refresh` | Generates a new access token using a valid refresh token. |
-| `POST` | `/api/auth/logout` | Revokes the current session and blacklists the token in Redis. |
-| `POST` | `/api/auth/forgot-password` | Generates a 15-minute reset token stored in Redis. |
-| `POST` | `/api/auth/reset-password` | Resets user password using a valid reset token. |
+| Method | Endpoint                    | Description                                                    |
+| ------ | --------------------------- | -------------------------------------------------------------- |
+| `POST` | `/api/auth/register`        | Creates a new user identity.                                   |
+| `POST` | `/api/auth/login`           | Exchanges credentials for Access (JWT) and Refresh tokens.     |
+| `POST` | `/api/auth/refresh`         | Generates a new access token using a valid refresh token.      |
+| `POST` | `/api/auth/logout`          | Revokes the current session and blacklists the token in Redis. |
+| `POST` | `/api/auth/forgot-password` | Generates a 15-minute reset token stored in Redis.             |
+| `POST` | `/api/auth/reset-password`  | Resets user password using a valid reset token.                |
 
 ### User Services (`/api/users`)
 
-| Method | Endpoint | Authorization | Description |
-| --- | --- | --- | --- |
-| `GET` | `/api/users/me` | `Authenticated` | Returns the profile data of the currently logged-in user. |
-| `GET` | `/api/users/admin-only` | `SYSTEM_READ` | Verifies administrative access levels. |
+| Method | Endpoint                | Authorization   | Description                                               |
+| ------ | ----------------------- | --------------- | --------------------------------------------------------- |
+| `GET`  | `/api/users/me`         | `Authenticated` | Returns the profile data of the currently logged-in user. |
+| `GET`  | `/api/users/admin-only` | `SYSTEM_READ`   | Verifies administrative access levels.                    |
 
 ### Administrative Council (`/api/admin`)
 
-| Method | Endpoint | Authority | Description |
-| --- | --- | --- | --- |
-| `GET` | `/api/admin/logs` | `SYSTEM_READ` | Retrieves the complete system audit log history. |
-| `GET` | `/api/admin/status` | `ROLE_ADMIN` | Returns real-time health data for DB and Redis layers. |
-| `GET` | `/api/admin/users` | `SYSTEM_READ` | Lists all registered users and their current statuses. |
-| `PATCH` | `/api/admin/users/{id}/toggle-lock` | `USER_WRITE` | Locks or unlocks a specific user account. |
-| `PUT` | `/api/admin/users/{id}` | `USER_WRITE` | Updates metadata for an existing user account. |
+| Method  | Endpoint                            | Authority     | Description                                            |
+| ------- | ----------------------------------- | ------------- | ------------------------------------------------------ |
+| `GET`   | `/api/admin/logs`                   | `SYSTEM_READ` | Retrieves the complete system audit log history.       |
+| `GET`   | `/api/admin/status`                 | `ROLE_ADMIN`  | Returns real-time health data for DB and Redis layers. |
+| `GET`   | `/api/admin/users`                  | `SYSTEM_READ` | Lists all registered users and their current statuses. |
+| `PATCH` | `/api/admin/users/{id}/toggle-lock` | `USER_WRITE`  | Locks or unlocks a specific user account.              |
+| `PUT`   | `/api/admin/users/{id}`             | `USER_WRITE`  | Updates metadata for an existing user account.         |
 
 ## Security Architecture
 
@@ -125,9 +129,9 @@ The server will initialize on `http://localhost:8080`.
 
 The system uses a hierarchical permission model:
 
-* **Roles:** Groups of permissions (e.g., `ROLE_USER`, `ROLE_ADMIN`).
-* **Permissions:** Granular authorities (e.g., `SYSTEM_READ`, `USER_WRITE`) mapped to roles.
-* **Method Security:** Secured via `@PreAuthorize` annotations at the controller level.
+- **Roles:** Groups of permissions (e.g., `ROLE_USER`, `ROLE_ADMIN`).
+- **Permissions:** Granular authorities (e.g., `SYSTEM_READ`, `USER_WRITE`) mapped to roles.
+- **Method Security:** Secured via `@PreAuthorize` annotations at the controller level.
 
 ## Testing
 
@@ -143,12 +147,13 @@ Run tests using:
 
 Global exceptions are managed by `GlobalExceptionHandler`, ensuring standardized JSON responses for:
 
-* **403 Forbidden:** Insufficient authorities or denied access.
-* **401 Unauthorized:** Invalid or missing credentials.
-* **429 Too Many Requests:** Rate limit threshold exceeded.
-* **409 Conflict:** Business logic or runtime violations.
+- **403 Forbidden:** Insufficient authorities or denied access.
+- **401 Unauthorized:** Invalid or missing credentials.
+- **429 Too Many Requests:** Rate limit threshold exceeded.
+- **409 Conflict:** Business logic or runtime violations.
 
 ---
 
 **Lead Developer:** Shizain
 **Project Status:** Hardened / Production-Ready Backend Base.
+
