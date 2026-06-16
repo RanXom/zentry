@@ -23,7 +23,9 @@ To run this project, the following components must be installed on the host syst
 
 ## System Architecture
 
-<img src="./assets/Architecture.svg" alt="System Architecture" width="50%">
+<div align="center">
+  <img src="./assets/Architecture.svg" alt="System Architecture" width="70%">
+</div>
 
 ## Getting Started
 
