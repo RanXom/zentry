@@ -23,7 +23,7 @@ To run this project, the following components must be installed on the host syst
 
 ## System Architecture
 
-![System Architecture](./assets/Architecture.svg)
+<img src="./assets/Architecture.svg" alt="System Architecture" width="50%">
 
 ## Getting Started
 
@@ -156,4 +156,3 @@ Global exceptions are managed by `GlobalExceptionHandler`, ensuring standardized
 
 **Lead Developer:** Shizain
 **Project Status:** Hardened / Production-Ready Backend Base.
-
