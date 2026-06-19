@@ -1,6 +1,19 @@
+<div align="center">
+
 # Zentry Identity Management System
 
+![Java](https://img.shields.io/badge/Java-25-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-6DB33F)
+![Spring Security](https://img.shields.io/badge/Security-JWT%20%2B%20RBAC-success)
+![Database](https://img.shields.io/badge/Database-PostgreSQL%2016-blue)
+![Cache](https://img.shields.io/badge/Cache-Redis%207-red)
+![Build](https://img.shields.io/badge/Build-Maven-C71A36)
+![Coverage](https://img.shields.io/badge/Test%20Coverage-100%25-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-blue)
+
 Zentry is a high-performance backend infrastructure designed for secure identity management, authentication, and administrative oversight. Built on the latest Java and Spring Boot ecosystems, it provides a production-grade environment featuring JWT-based authentication, Redis-backed rate limiting, and automated audit logging.
+
+</div>
 
 ## Prerequisites
 
